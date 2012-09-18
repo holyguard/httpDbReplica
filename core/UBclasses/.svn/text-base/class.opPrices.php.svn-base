@@ -1,0 +1,25 @@
+<?
+// operational class Prices
+class opPrices{
+	
+	function delete(){
+    
+		global $db;
+		
+	    /*$delDates = $db->get_results("SELECT * FROM hgw_hotel_prezzi WHERE data_out < ".strtotime(date("Y-m-d"))."");
+
+		 foreach ( $delDates as $delDate ){
+			 echo ''.$delDate->ID.', '.date("Y-m-d", $delDate->data_in).','.date("Y-m-d", $delDate->data_out).'<br />';
+		 }*/
+		 
+		 // cancella tutti i prezzi che hanno date inferiori ad oggi
+		 $db->query("DELETE FROM hgw_hotel_prezzi WHERE data_out < ".strtotime(date("Y-m-d"))."");
+		 
+		 
+		 
+    }
+}
+
+
+//$opPrices = new opPrices();
+//$opPrices->delete();

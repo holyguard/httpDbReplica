@@ -1,0 +1,86 @@
+<?
+// operational class Prices
+class paidServices{
+		
+	// ottieni la attivazione del servizio
+	function getPaidServiceActivation($serviceID,$hotel,$user){    
+		global $db;		
+		//verifica se il servizio era stato attivato in passato
+		$cntMulti = $db->get_var("SELECT count(*) FROM hgw_hotel_paid_services WHERE service = '".$serviceID."' AND ID_HOTEL = ".$hotel." AND ID_USER = '".$user."'");
+		
+		//se il servizio era stato attivato
+		if((int)$cntMulti>0){
+			return 1;
+		} else {
+			return 0;
+		}		 
+    }
+	
+	
+	// ottieni lo status del servizio
+	function getPaidServiceStatus($serviceID,$hotel,$user){    
+		global $db;		
+		$isActivated = $this->getPaidServiceActivation($serviceID,$hotel,$user);
+		
+		//se il servizio era stato attivato
+		if((int)$isActivated==1){
+				$dataMulti = $db->get_row("SELECT * FROM hgw_hotel_paid_services WHERE service = '".$serviceID."' AND ID_HOTEL = '".$hotel."' AND ID_USER = '".$user."'");
+			  	
+				echo 'end date:';
+				
+				//echo date("Y-m-d", $dataMulti->active_start).'<br>';
+				echo date("Y-m-d", $dataMulti->active_end).'<br>';
+			  
+			  	//se il servizio é scaduto allora puoi comprare
+			  	if(strtotime(date("Y-m-d"))>=((int)$dataMulti->active_end-432000)){
+					echo'adesso puoi comprare';
+			  	}
+		} 		 
+    }
+	
+	
+	// ottieni autorizzazione a visualizzare il servizio 
+	// l'autorizzazione funziona in base a due parametri
+	// 1-servizio attivo per utente 2-data di attivazione per hotel
+	function getPaidServiceAuth($serviceID,$hotel,$user){    
+	
+		global $db;	
+		
+		$userData = $db->get_row("SELECT * FROM hgw_users WHERE ID = '".$user."'");	
+		
+		$isActivated = $this->getPaidServiceActivation($serviceID,$hotel,$user);		
+		
+		//se il servizio era stato attivato
+		//if(((int)$isActivated==1)&&($userData->APP_MULTIRATES=='1')){
+		if((int)$isActivated==1){
+			
+				$dataMulti = $db->get_row("SELECT * FROM hgw_hotel_paid_services WHERE service = '".$serviceID."' AND ID_HOTEL = '".$hotel."' AND ID_USER = '".$user."'");
+
+			  	//se il servizio é scaduto allora = zero
+			  	if(strtotime(date("Y-m-d"))>=((int)$dataMulti->active_end-432000)){
+					return 0;
+			  	} else {
+				// oppure il servizio é attivo
+				 	return 1;
+				}
+		} else {
+			return 0;
+		}
+		 
+    }
+	
+	
+		// ottieni la attivazione del servizio
+	function getPaidServiceEndDate($serviceID,$hotel,$user){    
+		global $db;		
+		//verifica se il servizio era stato attivato in passato
+		$service = $db->get_row("SELECT * FROM hgw_hotel_paid_services WHERE service = '".$serviceID."' AND ID_HOTEL = ".$hotel." AND ID_USER = '".$user."'");
+		
+		return date("Y-m-d", $service->active_end);
+    }
+	
+}
+
+
+//$opPrices = new opPrices();
+//$opPrices->delete();
