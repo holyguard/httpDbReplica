@@ -158,5 +158,5 @@ class httpDbReplica{
 }
 
 
-//$opPrices = new opPrices();
+$dbRp = new httpDbReplica();
 //$opPrices->delete();
