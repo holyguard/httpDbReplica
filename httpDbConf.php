@@ -2,8 +2,7 @@
 
 
 $servers = array(
-	"foo", 
-	"bar", 
-	"hallo", 
-	"world"
+	"http://www.upbooking.com", 
+	"http://www2.upbooking.com", 
+	"http://dev.upbooking.com"
 );

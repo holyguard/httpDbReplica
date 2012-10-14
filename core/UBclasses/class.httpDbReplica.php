@@ -2,7 +2,8 @@
 // operational class Prices
 class httpDbReplica{
 	
-
+	# function query(value)
+	# write to database and send signal to receiver 
 	function query($query){
 		    
 		global $db;
@@ -13,27 +14,23 @@ class httpDbReplica{
 		$myFile = $this->generateName();		
 		$this->writeLog($myFile,$query);		
 		
-		foreach ($servers as $server) {
-			if ($this->isDomainAvailible($server)){
-				$this->sendSignal($server.'/httpDbReplica/receiver.php?l='.$myFile.'');
-			} else {
-				echo "Woops, nothing found there.";
-			}
-		}			 
+		# propagate the file in all the servers configured	
+		# send the signal to every server configured
+		$this->propagate($servers,$myFile);				 
     }
 	
 	
 	
-	function receive($myFile){
+	function receive($myFile,$url){
 		
 		global $db;
 		global $servers;
 		    
- 		// get remote file		
+ 		# get remote file		
 		if (function_exists('curl_init')) {
 		   
 		   $ch = curl_init(); 	
-		   curl_setopt($ch, CURLOPT_URL, 'http://www.google.com'); 		
+		   curl_setopt($ch, CURLOPT_URL, $url); 		
 		   curl_setopt($ch, CURLOPT_HEADER, 0); 		
 		   curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); 		
 		   curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.7.5) Gecko/20041107 Firefox/1.0'); 		
@@ -41,22 +38,18 @@ class httpDbReplica{
 		   curl_close($ch); 
 			
 		} else {
-		   // curl library is not installed so we better use something else
+		   # curl library is not installed so we better use something else
 		}		
 
-		// read it and execute query
+		# get the content of file and execute it
 		$db->query($query);	
-		// save it in a specific dir
+		
+		# save the file in a specific dir
 		$this->writeLog($myFile,$query);
 		
-		// propagate the file in the other servers		
-		foreach ($servers as $server) {
-			if ($this->isDomainAvailible($server)){
-				$this->sendSignal($server.'/httpDbReplica/receiver.php?l='.$myFile.'');
-			} else {
-				echo "Woops, nothing found there.";
-			}
-		}		 
+		# propagate the file in all the servers configured	
+		# send the signal to every server configured	
+		$this->propagate($servers,$myFile);		 
     }
 	
 	
@@ -73,6 +66,20 @@ class httpDbReplica{
 	
 	}
 	
+	function propagate($servers,$myFile){
+		foreach ($servers as $server) {
+			
+			# check if the server is online 
+			if ($this->isDomainAvailible($server)){
+				
+				$this->sendSignal($server.'/httpDbReplica/receiver.php?l='.$myFile.'&s='.$_SERVER['HTTP_HOST']);
+			} else {
+				echo "Woops, nothing found there.";
+			}
+		}
+	}
+	
+	# sendSignal(url) send the signal in background
 	function sendSignal($url){	
 
 		$parts = parse_url($url);
@@ -107,7 +114,7 @@ class httpDbReplica{
 		);
 		
 		$curl_options = array(
-			CURLOPT_URL => "http://www.upbooking.com/httpDbReplica/test/curl-receive-post.php",
+			CURLOPT_URL => $url,
 			CURLOPT_POST => true,
 			CURLOPT_POSTFIELDS => http_build_query( $curl_parameters ),
 			CURLOPT_HTTP_VERSION => 1.0,

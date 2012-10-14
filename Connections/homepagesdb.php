@@ -5,6 +5,7 @@ $database_homepagesdb 		= "upbooking";
 $database_geo_homepagesdb 	= "hgw_geoplaces";
 $username_homepagesdb 		= "holyguard";
 $password_homepagesdb 		= "boris01";
+
     /**********************************************************************
     *  ezSQL initialisation for mySQL
     */
